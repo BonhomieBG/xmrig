@@ -135,7 +135,7 @@ set(SOURCES_CRYPTO
     src/crypto/flex/flex.cpp
     src/crypto/flex/flex_keccak.c
     src/crypto/hoohash/hoohash.c
-    src/crypto/hoohash/bigint.
+    src/crypto/hoohash/bigint.c
     src/crypto/hoohashv1/hoohash.c
     src/crypto/hoohashv1/bigint.c
    )
