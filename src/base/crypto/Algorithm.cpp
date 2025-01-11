@@ -321,11 +321,12 @@ static const std::map<const char *, Algorithm::Id, aliasCompare> kAlgorithmAlias
 #   endif
 
 #   ifdef XMRIG_ALGO_HOOHASH
-    ALGO_ALIAS_AUT0(HOOHASH),       ALGO_ALIAS(HOOHASH,         "hoohash"),
+    ALGO_ALIAS_AUTO(HOOHASH),       ALGO_ALIAS(HOOHASH,         "hoohash"),
                                     ALGO_ALIAS(HOOHASH,         "hoosat"),
+#   endif
 
 #   ifdef XMRIG_ALGO_HOOHASHV1                                    
-    ALGO_ALIAS_AUTO(HOOHASHV1),     ALGO_ALIAS(HOOHASHV1        "hoohashv1"),
+    ALGO_ALIAS_AUTO(HOOHASHV1),     ALGO_ALIAS(HOOHASHV1,       "hoohashv1"),
                                     ALGO_ALIAS(HOOHASHV1,       "pugdag"),
 #   endif
 
