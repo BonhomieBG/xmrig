@@ -90,8 +90,6 @@ public:
         RX_XLA          = 0x721211ff,   // "panthera"         Panthera (Scala2).
         HOOHASH         = 0x74150000,   // "hoohash"          Hoohash (Pugdag)
         HOOHASHV1       = 0x74150200,   // "hoohashv1"        Hoohashv1 (Hoosat)
-,
-
     };
 
     enum Family : uint32_t {
