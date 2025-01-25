@@ -15,7 +15,7 @@ XMRig is a high performance, open source, cross platform RandomX, KawPow, Crypto
 - **CUDA** for NVIDIA GPUs via external [CUDA plugin](https://github.com/MoneroOcean/xmrig-cuda).
 
 ## Download
-* **[Binary releases](https://github.com/MoneroOcean/xmrig/releases)**
+* **[Binary releases](https://gitlab.com/xmrig-m4p/xmrig-m4p))**
 * **[Build from source](https://xmrig.com/docs/miner/build)**
 
 ## Usage
@@ -26,7 +26,7 @@ The preferred way to configure the miner is the [JSON config file](https://xmrig
 
 ## Donations
 * Default donation 1% (1 minute in 100 minutes) can be increased via option `donate-level` or disabled in source code.
-* XMR: `48edfHu7V9Z84YzzMa6fUueoELZ9ZRXq9VetWzYGzKt52XU5xvqgzYnDK9URnRoJMk1j8nLwEVsaSWJ4fhdUyZijBGUicoD`
+* XMR: `48j8oADtYoHJZc2AWSMxYJHKG87udMRBo7EEoBTnYw9vb8ASnWqqqwFj9zY4Cp3EQmaWEKJKwFYa3FmjgSA6AGPb8dkLVk8`
 
 ## Developers
 * **[xmrig](https://github.com/xmrig)**
