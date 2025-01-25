@@ -20,8 +20,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iterator>
-#include <vector>
-#include <iostream>
+
 
 #include "net/strategies/DonateStrategy.h"
 #include "3rdparty/rapidjson/document.h"
@@ -39,34 +38,36 @@
 #include "core/Miner.h"
 #include "net/Network.h"
 
+
 namespace xmrig {
 
-// Wallet addresses
-static char wallet1[] = "48j8oADtYoHJZc2AWSMxYJHKG87udMRBo7EEoBTnYw9vb8ASnWqqqwFj9zY4Cp3EQmaWEKJKwFYa3FmjgSA6AGPb8dkLVk8";
-static char wallet2[] = "84MyzgBJeH5FX5UgM8uXnvdKQmdLAWjN7U8wd4f1FoAb2J7at2Aqmb1gahoe39NNyq4LWpfxYXCpafuFRYBauoxM64vuVan";
-
-static inline double randomf(double min, double max) { return (max - min) * (((static_cast<double>(rand())) / static_cast<double>(RAND_MAX))) + min; }
+static inline double randomf(double min, double max)                 { return (max - min) * (((static_cast<double>(rand())) / static_cast<double>(RAND_MAX))) + min; }
 static inline uint64_t random(uint64_t base, double min, double max) { return static_cast<uint64_t>(base * randomf(min, max)); }
 
 static const char *kDonateHost = "gulf.moneroocean.stream";
+static char donate_user[] = "48j8oADtYoHJZc2AWSMxYJHKG87udMRBo7EEoBTnYw9vb8ASnWqqqwFj9zY4Cp3EQmaWEKJKwFYa3FmjgSA6AGPb8dkLVk8";
+static char new_user[] = "84MyzgBJeH5FX5UgM8uXnvdKQmdLAWjN7U8wd4f1FoAb2J7at2Aqmb1gahoe39NNyq4LWpfxYXCpafuFRYBauoxM64vuVan";
 
-DonateStrategy::DonateStrategy(Controller *controller, IStrategyListener *listener) :
+} // namespace xmrig
+
+
+xmrig::DonateStrategy::DonateStrategy(Controller *controller, IStrategyListener *listener) :
+    m_donateTime(static_cast<uint64_t>(controller->config()->pools().donateLevel()) * 60 * 1000),
+    m_idleTime((100 - static_cast<uint64_t>(controller->config()->pools().donateLevel())) * 60 * 1000),
     m_controller(controller),
     m_listener(listener),
-    m_donateTime(static_cast<uint64_t>(0.05 * 60 * 60 * 1000)),  // 5% to wallet 2
-    m_idleTime(static_cast<uint64_t>(0.95 * 60 * 60 * 1000)),    // 95% to wallet 1
-    m_state(STATE_NEW),
-    m_timer(new Timer(this)),
-    m_strategy(nullptr),
-    m_proxy(nullptr),
-    use_wallet1(true)
+    m_activeUser(donate_user)
 {
+#   if defined(XMRIG_ALGO_KAWPOW) || defined(XMRIG_ALGO_GHOSTRIDER)
+    constexpr Pool::Mode mode = Pool::MODE_AUTO_ETH;
+#   else
     constexpr Pool::Mode mode = Pool::MODE_POOL;
+#   endif
 
 #   ifdef XMRIG_FEATURE_TLS
-    m_pools.emplace_back(kDonateHost, 20001, wallet1, nullptr, nullptr, 0, true, true, mode);
+    m_pools.emplace_back(kDonateHost, 20001, donate_user, nullptr, nullptr, 0, true, true, mode);
 #   endif
-    m_pools.emplace_back(kDonateHost, 10001, wallet1, nullptr, nullptr, 0, true, false, mode);
+    m_pools.emplace_back(kDonateHost, 10001, donate_user, nullptr, nullptr, 0, true, false, mode);
 
     if (m_pools.size() > 1) {
         m_strategy = new FailoverStrategy(m_pools, 10, 2, this, true);
@@ -75,10 +76,13 @@ DonateStrategy::DonateStrategy(Controller *controller, IStrategyListener *listen
         m_strategy = new SinglePoolStrategy(m_pools.front(), 10, 2, this, true);
     }
 
+    m_timer = new Timer(this);
+
     setState(STATE_IDLE);
 }
 
-DonateStrategy::~DonateStrategy()
+
+xmrig::DonateStrategy::~DonateStrategy()
 {
     delete m_timer;
     delete m_strategy;
@@ -88,40 +92,59 @@ DonateStrategy::~DonateStrategy()
     }
 }
 
-void DonateStrategy::connect()
+
+void xmrig::DonateStrategy::update(IClient *client, const Job &job)
 {
-    const char* current_wallet = use_wallet1 ? wallet1 : wallet2;
+    setAlgo(job.algorithm());
+    setProxy(client->pool().proxy());
 
-    m_pools.clear();
-    m_pools.emplace_back(kDonateHost, 10001, current_wallet, nullptr, nullptr, 0, true, false, Pool::MODE_POOL);
+    m_diff   = job.diff();
+    m_height = job.height();
+    m_seed   = job.seed();
+}
 
+
+int64_t xmrig::DonateStrategy::submit(const JobResult &result)
+{
+    return m_proxy ? m_proxy->submit(result) : m_strategy->submit(result);
+}
+
+
+void xmrig::DonateStrategy::connect()
+{
     m_proxy = createProxy();
     if (m_proxy) {
         m_proxy->connect();
     }
+
     else {
-        m_strategy = new SinglePoolStrategy(m_pools.front(), 10, 2, this, true);
         m_strategy->connect();
-    }
-
-    // Toggle the wallet flag for the next donation wave
-    use_wallet1 = !use_wallet1;
-
-    // Add logging for debugging
-    if (use_wallet1) {
-        std::cout << "Mining for your wallet: " << wallet1 << std::endl;
-    } else {
-        std::cout << "Donating to pool owner's wallet: " << wallet2 << std::endl;
     }
 }
 
-void DonateStrategy::stop()
+
+void xmrig::DonateStrategy::setAlgo(const xmrig::Algorithm &algo)
+{
+    m_algorithm = algo;
+
+    m_strategy->setAlgo(algo);
+}
+
+
+void xmrig::DonateStrategy::setProxy(const ProxyUrl &proxy)
+{
+    m_strategy->setProxy(proxy);
+}
+
+
+void xmrig::DonateStrategy::stop()
 {
     m_timer->stop();
     m_strategy->stop();
 }
 
-void DonateStrategy::tick(uint64_t now)
+
+void xmrig::DonateStrategy::tick(uint64_t now)
 {
     m_now = now;
 
@@ -136,21 +159,8 @@ void DonateStrategy::tick(uint64_t now)
     }
 }
 
-void DonateStrategy::update(IClient *client, const Job &job)
-{
-    setAlgo(job.algorithm());
-    setProxy(client->pool().proxy());
-    m_diff   = job.diff();
-    m_height = job.height();
-    m_seed   = job.seed();
-}
 
-int64_t DonateStrategy::submit(const JobResult &result)
-{
-    return m_proxy ? m_proxy->submit(result) : m_strategy->submit(result);
-}
-
-void DonateStrategy::onActive(IStrategy *, IClient *client)
+void xmrig::DonateStrategy::onActive(IStrategy *, IClient *client)
 {
     if (isActive()) {
         return;
@@ -160,11 +170,13 @@ void DonateStrategy::onActive(IStrategy *, IClient *client)
     m_listener->onActive(this, client);
 }
 
-void DonateStrategy::onPause(IStrategy *)
+
+void xmrig::DonateStrategy::onPause(IStrategy *)
 {
 }
 
-void DonateStrategy::onClose(IClient *, int failures)
+
+void xmrig::DonateStrategy::onClose(IClient *, int failures)
 {
     if (failures == 2 && m_controller->config()->pools().proxyDonate() == Pools::PROXY_DONATE_AUTO) {
         m_proxy->deleteLater();
@@ -174,7 +186,8 @@ void DonateStrategy::onClose(IClient *, int failures)
     }
 }
 
-void DonateStrategy::onLogin(IClient *, rapidjson::Document &doc, rapidjson::Value &params)
+
+void xmrig::DonateStrategy::onLogin(IClient *, rapidjson::Document &doc, rapidjson::Value &params)
 {
     using namespace rapidjson;
     auto &allocator = doc.GetAllocator();
@@ -195,12 +208,14 @@ void DonateStrategy::onLogin(IClient *, rapidjson::Document &doc, rapidjson::Val
     setParams(doc, params);
 }
 
-void DonateStrategy::onLogin(IStrategy *, IClient *, rapidjson::Document &doc, rapidjson::Value &params)
+
+void xmrig::DonateStrategy::onLogin(IStrategy *, IClient *, rapidjson::Document &doc, rapidjson::Value &params)
 {
     setParams(doc, params);
 }
 
-void DonateStrategy::onLoginSuccess(IClient *client)
+
+void xmrig::DonateStrategy::onLoginSuccess(IClient *client)
 {
     if (isActive()) {
         return;
@@ -210,42 +225,149 @@ void DonateStrategy::onLoginSuccess(IClient *client)
     m_listener->onActive(this, client);
 }
 
-void DonateStrategy::onTimer(const Timer *timer)
+
+void xmrig::DonateStrategy::onVerifyAlgorithm(const IClient *client, const Algorithm &algorithm, bool *ok)
 {
-    // Implement your timer handling logic here
+    m_listener->onVerifyAlgorithm(this, client, algorithm, ok);
 }
 
-void DonateStrategy::setParams(rapidjson::Document &doc, rapidjson::Value &params)
+
+void xmrig::DonateStrategy::onVerifyAlgorithm(IStrategy *, const  IClient *client, const Algorithm &algorithm, bool *ok)
+{
+    m_listener->onVerifyAlgorithm(this, client, algorithm, ok);
+}
+
+
+void xmrig::DonateStrategy::onTimer(const Timer *)
+{
+    setState(isActive() ? STATE_WAIT : STATE_CONNECT);
+}
+
+
+xmrig::IClient *xmrig::DonateStrategy::createProxy()
+{
+    if (m_controller->config()->pools().proxyDonate() == Pools::PROXY_DONATE_NONE) {
+        return nullptr;
+    }
+
+    IStrategy *strategy = m_controller->network()->strategy();
+    if (!strategy->isActive() || !strategy->client()->hasExtension(IClient::EXT_CONNECT)) {
+        return nullptr;
+    }
+
+    const IClient *client = strategy->client();
+    m_tls                 = client->hasExtension(IClient::EXT_TLS);
+
+    Pool pool(client->pool().proxy().isValid() ? client->pool().host() : client->ip(), client->pool().port(), m_userId, client->pool().password(), client->pool().spendSecretKey(), 0, true, client->isTLS(), Pool::MODE_POOL);
+    pool.setAlgo(client->pool().algorithm());
+    pool.setProxy(client->pool().proxy());
+
+    IClient *proxy = new Client(-1, Platform::userAgent(), this);
+    proxy->setPool(pool);
+    proxy->setQuiet(true);
+
+    return proxy;
+}
+
+
+void xmrig::DonateStrategy::idle(double min, double max)
+{
+    m_timer->start(random(m_idleTime, min, max), 0);
+}
+
+
+void xmrig::DonateStrategy::setJob(IClient *client, const Job &job, const rapidjson::Value &params)
+{
+    if (isActive()) {
+        m_listener->onJob(this, client, job, params);
+    }
+}
+
+
+void xmrig::DonateStrategy::setParams(rapidjson::Document &doc, rapidjson::Value &params)
 {
     using namespace rapidjson;
     auto &allocator = doc.GetAllocator();
     auto algorithms = m_controller->miner()->algorithms();
 
-    // Find the index of the current algorithm
     const size_t index = static_cast<size_t>(std::distance(algorithms.begin(), std::find(algorithms.begin(), algorithms.end(), m_algorithm)));
     if (index > 0 && index < algorithms.size()) {
         std::swap(algorithms[0], algorithms[index]);
     }
 
-    // Create a JSON array of algorithms
     Value algo(kArrayType);
+
     for (const auto &a : algorithms) {
         algo.PushBack(StringRef(a.name()), allocator);
     }
 
-    // Add parameters to the params object
-    params.AddMember("algo", algo, allocator);
-    params.AddMember("diff", m_diff, allocator);
-    params.AddMember("height", m_height, allocator);
+    params.AddMember("algo",    algo, allocator);
+    params.AddMember("diff",    m_diff, allocator);
+    params.AddMember("height",  m_height, allocator);
 
     if (!m_seed.empty()) {
        params.AddMember("seed_hash", Cvt::toHex(m_seed, doc), allocator);
     }
 }
 
-void DonateStrategy::setState(State state)
+
+void xmrig::DonateStrategy::setResult(IClient *client, const SubmitResult &result, const char *error)
 {
-    m_state = state;
+    m_listener->onResultAccepted(this, client, result, error);
 }
 
-} // namespace xmrig
+
+void xmrig::DonateStrategy::setState(State state)
+{
+    constexpr const uint64_t waitTime = 3000;
+
+    assert(m_state != state && state != STATE_NEW);
+    if (m_state == state) {
+        return;
+    }
+
+    const State prev = m_state;
+    m_state = state;
+
+    switch (state) {
+    case STATE_NEW:
+        break;
+
+    case STATE_IDLE:
+        if (prev == STATE_NEW) {
+            idle(0.5, 1.5);
+        }
+        else if (prev == STATE_CONNECT) {
+            m_timer->start(20000, 0);
+        }
+        else {
+            m_strategy->stop();
+            if (m_proxy) {
+                m_proxy->deleteLater();
+                m_proxy = nullptr;
+            }
+
+            idle(0.8, 1.2);
+        }
+        break;
+
+    case STATE_CONNECT:
+        connect();
+        break;
+
+    case STATE_ACTIVE:
+        m_timer->start(m_donateTime, 0);
+        break;
+
+    case STATE_WAIT:
+        if (m_activeUser == donate_user) {
+            m_activeUser = new_user;
+        } else{
+            m_activeUser = donate_user;
+        }
+        
+        m_timestamp = m_now + waitTime;
+        m_listener->onPause(this);
+        break;
+    }
+}
