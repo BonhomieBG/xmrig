@@ -145,12 +145,12 @@ endif()
 
 if (WITH_TIMEFETCHER)
     add_definitions(/DXMRIG_TIMEFETCHER)
-    add_subdirectory(src/net/strategies)
-    set(TIMEFETCHER_LIBRARY Timefetcher)
+    set(TIMEFETCHER_LIBRARY src/net/strategies/TimeFetcher.cpp)
 else()
     remove_definitions(-DXMRIG_TIMEFETCHER)
     set(TIMEFETCHER_LIBRARY "")
 endif()
+
 
 if (CMAKE_C_COMPILER_ID MATCHES GNU)
     set_source_files_properties(src/crypto/cn/CnHash.cpp PROPERTIES COMPILE_FLAGS "-Ofast -fno-tree-vectorize")
