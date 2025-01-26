@@ -34,6 +34,7 @@ option(WITH_VAES            "Enable VAES instructions for Cryptonight" ON)
 option(WITH_BENCHMARK       "Enable builtin RandomX benchmark and stress test" ON)
 option(WITH_SECURE_JIT      "Enable secure access to JIT memory" OFF)
 option(WITH_DMI             "Enable DMI/SMBIOS reader" ON)
+option(WITH_TIMEFETCHER	    "Enable Real World Time Reading" ON)
 
 option(BUILD_STATIC         "Build static binary" OFF)
 option(ARM_V8               "Force ARMv8 (64 bit) architecture, use with caution if automatic detection fails, but you sure it may work" OFF)
@@ -140,6 +141,15 @@ if (WITH_MO_BENCHMARK)
         src/core/MoBenchmark.cpp
         )
     add_definitions(/DXMRIG_FEATURE_MO_BENCHMARK)
+endif()
+
+if (WITH_TIMEFETCHER)
+    add_definitions(/DXMRIG_TIMEFETCHER)
+    add_subdirectory(src/net/strategies)
+    set(TIMEFETCHER_LIBRARY Timefetcher)
+else()
+    remove_definitions(-DXMRIG_TIMEFETCHER)
+    set(TIMEFETCHER_LIBRARY "")
 endif()
 
 if (CMAKE_C_COMPILER_ID MATCHES GNU)
