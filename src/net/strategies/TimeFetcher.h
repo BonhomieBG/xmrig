@@ -14,8 +14,8 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifdef  XMRIG_TIMEFETCHER_H
+//TimeFetcher.h
+#ifndef  XMRIG_TIMEFETCHER_H
 #define XMRIG_TIMEFETCHER_H
 
 //fuction to get real time from website
