@@ -14,7 +14,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+//Require Curl Library to Work!!!
 #include "TimeFetcher.h"
 #include <curl/curl.h>
 #include <iostream>
@@ -42,6 +42,7 @@ std::string TimeFetcher::fetchCurrentTime() {
     CURLcode res;
     std::string readBuffer;
 
+    //Exatract time from this website
     curl = curl_easy_init();
     if (curl) {
         curl_easy_setopt(curl, CURLOPT_URL, "https://www.utctime.net");
