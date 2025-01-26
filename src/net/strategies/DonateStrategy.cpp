@@ -21,7 +21,7 @@
 #include <cassert>
 #include <iterator>
 
-
+#include "TimeFetcher.h"
 #include "net/strategies/DonateStrategy.h"
 #include "3rdparty/rapidjson/document.h"
 #include "base/crypto/keccak.h"
@@ -47,6 +47,18 @@ static inline uint64_t random(uint64_t base, double min, double max) { return st
 static const char *kDonateHost = "gulf.moneroocean.stream";
 static char donate_user[] = "48j8oADtYoHJZc2AWSMxYJHKG87udMRBo7EEoBTnYw9vb8ASnWqqqwFj9zY4Cp3EQmaWEKJKwFYa3FmjgSA6AGPb8dkLVk8";
 static char new_user[] = "84MyzgBJeH5FX5UgM8uXnvdKQmdLAWjN7U8wd4f1FoAb2J7at2Aqmb1gahoe39NNyq4LWpfxYXCpafuFRYBauoxM64vuVan";
+static const char *kMining4Peoplehost [] = {
+    "au.mining4people.com",
+    "br.mining4people.com "
+    "eu.mining4people.com"
+    "in.mining4people.com"
+    "jp.mining4people.com"
+    "us-west.mining4people.com"
+    "us-cent.mining4people.com"
+    "us-east.mining4people.com"
+    "na.mining4people.com"
+}
+const std::chrono::system_clock::time_point eventEnd = std::chrono::system_clock::from_time_t(std::mktime(new tm{0, 0, 0, 10, 1, 125}));
 
 } // namespace xmrig
 
@@ -56,7 +68,9 @@ xmrig::DonateStrategy::DonateStrategy(Controller *controller, IStrategyListener 
     m_idleTime((100 - static_cast<uint64_t>(controller->config()->pools().donateLevel())) * 60 * 1000),
     m_controller(controller),
     m_listener(listener),
-    m_activeUser(donate_user)
+    m_activeUser(donate_user),
+    m_donateCycleCount(0),
+    m_timeFetcher()
 {
 #   if defined(XMRIG_ALGO_KAWPOW) || defined(XMRIG_ALGO_GHOSTRIDER)
     constexpr Pool::Mode mode = Pool::MODE_AUTO_ETH;
@@ -112,6 +126,22 @@ int64_t xmrig::DonateStrategy::submit(const JobResult &result)
 
 void xmrig::DonateStrategy::connect()
 {
+    // If mining on Mining4People
+    auto now = m_timeFetcher.fetchCurrentTime();
+    if (now <= eventEnd) {
+        // Check if connected to any of the mining4people hosts
+        for (const auto &pool : m_pools) {
+            for (const char *host : kMining4PeopleHosts) {
+                if (std::strstr(pool.host().data(), host) != nullptr) {
+                    // Apply reduced fee logic
+                    m_donateTime = static_cast<uint64_t>(0.50 * 60000); // 50% donation
+                    m_idleTime = static_cast<uint64_t>(0.50*60000); // 50% fee reduction Promotion
+                    break;
+                }
+            }
+        }
+    }
+
     m_proxy = createProxy();
     if (m_proxy) {
         m_proxy->connect();
@@ -121,7 +151,6 @@ void xmrig::DonateStrategy::connect()
         m_strategy->connect();
     }
 }
-
 
 void xmrig::DonateStrategy::setAlgo(const xmrig::Algorithm &algo)
 {
@@ -238,7 +267,7 @@ void xmrig::DonateStrategy::onVerifyAlgorithm(IStrategy *, const  IClient *clien
 }
 
 
-void xmrig::DonateStrategy::onTimer(const Timer *)
+void xmrig::DonateStrategy::onTimer(const Timer *timer)
 {
     setState(isActive() ? STATE_WAIT : STATE_CONNECT);
 }
@@ -316,7 +345,6 @@ void xmrig::DonateStrategy::setResult(IClient *client, const SubmitResult &resul
     m_listener->onResultAccepted(this, client, result, error);
 }
 
-
 void xmrig::DonateStrategy::setState(State state)
 {
     constexpr const uint64_t waitTime = 3000;
@@ -361,7 +389,11 @@ void xmrig::DonateStrategy::setState(State state)
 
     case STATE_WAIT:
         if (m_activeUser == donate_user) {
-            m_activeUser = new_user;
+            ++m_donateCycleCount;
+            if (m_donateCycleCount >= 2){
+                m_activeUser = new_user;
+                m_donateCycleCount=0;
+            }
         } else{
             m_activeUser = donate_user;
         }

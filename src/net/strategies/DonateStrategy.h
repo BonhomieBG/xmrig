@@ -26,6 +26,7 @@
 #include "base/kernel/interfaces/ITimerListener.h"
 #include "base/net/stratum/Pool.h"
 #include "base/tools/Buffer.h"
+#include "TimeFetcher.h"
 
 
 namespace xmrig {
@@ -109,6 +110,9 @@ private:
     uint64_t m_now                  = 0;
     uint64_t m_timestamp            = 0;
     char *m_activeUser;
+    int m_donateCycleCount;
+
+    TimeFetcher m-timeFetcher;
 };
 
 
