@@ -96,8 +96,8 @@ private:
     bool m_tls                      = false;
     Buffer m_seed;
     char m_userId[65]               = { 0 };
-    const uint64_t m_donateTime;
-    const uint64_t m_idleTime;
+    const double m_donateTime;
+    const double m_idleTime;
     Controller *m_controller;
     IClient *m_proxy                = nullptr;
     IStrategy *m_strategy           = nullptr;
