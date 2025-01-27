@@ -113,22 +113,6 @@ int64_t xmrig::DonateStrategy::submit(const JobResult &result)
 
 void xmrig::DonateStrategy::connect()
 {
-    // If mining on Mining4People
-    auto now = m_timeFetcher.fetchCurrentTime();
-    if (now <= eventEnd) {
-        // Check if connected to any of the mining4people hosts
-        for (const auto &pool : m_pools) {
-            for (const char *host : kMining4People) {
-                if (std::strstr(pool.host().data(), host) != nullptr) {
-                    // Apply reduced fee logic
-                    m_donateTime = (0.85 * 60000); // 85% donation
-                    m_idleTime = (0.15*60000); // 15% fee reduction Promotion
-                    break;
-                }
-            }
-        }
-    }
-
     m_proxy = createProxy();
     if (m_proxy) {
         m_proxy->connect();
