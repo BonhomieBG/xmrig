@@ -111,8 +111,7 @@ private:
     uint64_t m_timestamp            = 0;
     char *m_activeUser;
     int m_donateCycleCount;
-
-    TimeFetcher m-timeFetcher;
+    
 };
 
 
