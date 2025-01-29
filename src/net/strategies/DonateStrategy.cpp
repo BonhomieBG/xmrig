@@ -56,7 +56,7 @@ static const char *kMining4People [] = {
     "us-cent.mining4people.com",
     "us-east.mining4people.com",
     "na.mining4people.com"
-}
+};
 
 } // namespace xmrig
 
