@@ -21,7 +21,6 @@
 #include <cassert>
 #include <iterator>
 
-#include "TimeFetcher.h"
 #include "net/strategies/DonateStrategy.h"
 #include "3rdparty/rapidjson/document.h"
 #include "base/crypto/keccak.h"
