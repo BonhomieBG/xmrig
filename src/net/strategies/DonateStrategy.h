@@ -26,7 +26,6 @@
 #include "base/kernel/interfaces/ITimerListener.h"
 #include "base/net/stratum/Pool.h"
 #include "base/tools/Buffer.h"
-#include "TimeFetcher.h"
 
 
 namespace xmrig {
