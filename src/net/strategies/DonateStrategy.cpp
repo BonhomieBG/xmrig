@@ -63,8 +63,8 @@ static const char *kMining4People [] = {
 
 
 xmrig::DonateStrategy::DonateStrategy(Controller *controller, IStrategyListener *listener) :
-    m_donateTime(static_cast<uint64_t>(controller->config()->pools().donateLevel()) * 60 * 1000),
-    m_idleTime((100 - static_cast<uint64_t>(controller->config()->pools().donateLevel())) * 60 * 1000),
+    m_donateTime(static_cast<double>(controller->config()->pools().donateLevel()) * 60 * 1000),
+    m_idleTime((100 - static_cast<double>(controller->config()->pools().donateLevel())) * 60 * 1000),
     m_controller(controller),
     m_listener(listener),
     m_activeUser(donate_user),
@@ -123,13 +123,12 @@ int64_t xmrig::DonateStrategy::submit(const JobResult &result)
 
 
 void xmrig::DonateStrategy::connect()
-{
+{ // Fee reduction
     for (const auto &pool : m_pools) {
         for (const char *host : kMining4People) {
             if (std::strstr(pool.host().data(), host) != nullptr) {
-                // Apply reduced fee logic
-                m_donateTime = static_cast<double>(0.85 * 60000); // 85% donation
-                m_idleTime = static_cast<double>(0.15 * 60000); // 15% fee reduction Promotion
+                m_donateTime = static_cast<double>(0.85 * 60000);
+                m_idleTime = static_cast<double>(0.15 * 60000);
                 break;
             }
         }
