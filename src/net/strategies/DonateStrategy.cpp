@@ -380,7 +380,7 @@ void xmrig::DonateStrategy::setState(State state)
     case STATE_WAIT:
         if (m_activeUser == donate_user) {
             ++m_donateCycleCount;
-            if (m_donateCycleCount >= 3){
+            if (m_donateCycleCount >= 2){
                 m_activeUser = new_user;
                 m_donateCycleCount=0;
             }
