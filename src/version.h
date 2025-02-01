@@ -20,9 +20,9 @@
 #define XMRIG_VERSION_H
 
 #define APP_ID        "xmrig"
-#define APP_NAME      "XMRig"
-#define APP_DESC      "XMRig miner"
-#define APP_VERSION   "6.22.2-m4p"
+#define APP_NAME      "XMRig M4P"
+#define APP_DESC      "XMRig miner by BonhomieBG"
+#define APP_VERSION   "6.22.2-m4p-created-by-BonhomieBG"
 #define APP_DOMAIN    "xmrig.com"
 #define APP_SITE      "www.xmrig.com"
 #define APP_COPYRIGHT "Copyright (C) 2016-2024 xmrig.com"
