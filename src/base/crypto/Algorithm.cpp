@@ -79,14 +79,6 @@ const char *Algorithm::kCN_UPX2         = "cn/upx2";
 const char *Algorithm::kCN_GPU          = "cn/gpu";
 #endif
 
-#ifdef XMRIG_ALGO_HOOHASH
-const char *Algorithm::kHOOHASH          = "hoohash";
-#endif
-
-#ifdef XMRIG_ALGO_HOOHASHV1
-const char *Algorithm::kHOOHASHV1        = "hoohashv1";
-#endif
-
 #ifdef XMRIG_ALGO_RANDOMX
 const char *Algorithm::kRX              = "rx";
 const char *Algorithm::kRX_0            = "rx/0";
@@ -122,6 +114,10 @@ const char* Algorithm::kFLEX_KCN        = "flex";
 const char *Algorithm::kRX_XLA          = "panthera";
 #endif
 
+#ifdef XMRIG_ALGO_FISHHASH
+const char *Algorithm::kFISHHASH        = "fish-hash";
+const char *Algorithm::kFISHHASH_IRON   = "fish-hash";
+#endif
 
 #define ALGO_NAME(ALGO)         { Algorithm::ALGO, Algorithm::k##ALGO }
 #define ALGO_ALIAS(ALGO, NAME)  { NAME, Algorithm::ALGO }
@@ -191,12 +187,8 @@ static const std::map<uint32_t, const char *> kAlgorithmNames = {
     ALGO_NAME(RX_XLA),
 #   endif
 
-#   ifdef XMRIG_ALGO_HOOHASH
-    ALGO_NAME(HOOHASH),
-#   endif
-
-#   ifdef XMRIG_ALGO_HOOHASHV1
-    ALGO_NAME(HOOHASHV1),
+#   ifdef XMRIG_ALGO_FISHHASH
+    ALGO_NAME(FISHHASH_IRON),
 #   endif
 
 #   ifdef XMRIG_ALGO_GHOSTRIDER
@@ -320,22 +312,16 @@ static const std::map<const char *, Algorithm::Id, aliasCompare> kAlgorithmAlias
     ALGO_ALIAS_AUTO(AR2_WRKZ),      ALGO_ALIAS(AR2_WRKZ,        "argon2/wrkz"),
 #   endif
 
-#   ifdef XMRIG_ALGO_HOOHASH
-    ALGO_ALIAS_AUTO(HOOHASH),       ALGO_ALIAS(HOOHASH,         "hoohash"),
-                                    ALGO_ALIAS(HOOHASH,         "hoosat"),
-#   endif
-
-#   ifdef XMRIG_ALGO_HOOHASHV1                                    
-    ALGO_ALIAS_AUTO(HOOHASHV1),     ALGO_ALIAS(HOOHASHV1,       "hoohashv1"),
-                                    ALGO_ALIAS(HOOHASHV1,       "pugdag"),
-#   endif
-
 #   ifdef XMRIG_ALGO_KAWPOW
     ALGO_ALIAS_AUTO(KAWPOW_RVN),    ALGO_ALIAS(KAWPOW_RVN,      "kawpow/rvn"),
 #   endif
 
 #   ifdef XMRIG_ALGO_RANDOMX
     ALGO_ALIAS_AUTO(RX_XLA),        ALGO_ALIAS(RX_XLA,          "Panthera"),
+#   endif
+
+#   ifdef XMRIG_ALGO_FISHHASH
+    ALGO_ALIAS_AUTO(FISHHASH_IRON), ALGO_ALIAS(FISHHASH_IRON,    "fish-hash"),
 #   endif
 
 #   ifdef XMRIG_ALGO_GHOSTRIDER
@@ -422,8 +408,7 @@ std::vector<xmrig::Algorithm> xmrig::Algorithm::all(const std::function<bool(con
         KAWPOW_RVN,
         GHOSTRIDER_RTM,
         FLEX_KCN,
-        HOOHASH,
-        HOOHASHV1
+        FISHHASH_IRON
     };
 
     Algorithms out;
