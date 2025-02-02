@@ -77,7 +77,7 @@ public:
         RX_0            = 0x72151200,   // "rx/0"             RandomX (reference configuration).
         RX_WOW          = 0x72141177,   // "rx/wow"           RandomWOW (Wownero).
         RX_ARQ          = 0x72121061,   // "rx/arq"           RandomARQ (Arqma).
-        RX_XEQ          = 0x72121000,
+        RX_XEQ          = 0x72121000,   // "rx/xeq"           RandomXEQ
         RX_GRAFT        = 0x72151267,   // "rx/graft"         RandomGRAFT (Graft).
         RX_SFX          = 0x72151273,   // "rx/sfx"           RandomSFX (Safex Cash).
         RX_KEVA         = 0x7214116b,   // "rx/keva"          RandomKEVA (Keva).
@@ -86,10 +86,9 @@ public:
         AR2_CHUKWA_V2   = 0x61140000,   // "argon2/chukwav2"  Argon2id (Chukwa v2).
         AR2_WRKZ        = 0x61120000,   // "argon2/wrkz"      Argon2id (WRKZ)
         KAWPOW_RVN      = 0x6b0f0000,   // "kawpow/rvn"       KawPow (RVN)
-
         RX_XLA          = 0x721211ff,   // "panthera"         Panthera (Scala2).
-        HOOHASH         = 0x74150000,   // "hoohash"          Hoohash (Pugdag)
-        HOOHASHV1       = 0x74150200,   // "hoohashv1"        Hoohashv1 (Hoosat)
+
+        FISHHASH_IRON   = 0x6544f000,   // "fish hash"        Fish Hash (Iron fish)
     };
 
     enum Family : uint32_t {
@@ -103,7 +102,8 @@ public:
         RANDOM_X        = 0x72000000,
         ARGON2          = 0x61000000,
         KAWPOW          = 0x6b000000,
-        GHOSTRIDER      = 0x6c000000
+        GHOSTRIDER      = 0x6c000000,
+        FISHHASH        = 0x65000000,
     };
 
     static const char *kINVALID;
@@ -176,19 +176,16 @@ public:
     static const char *kRX_XLA;
 #   endif
 
-#   ifdef XMRIG_ALGO_HOOHASH
-    static const char *kHOOHASH;
-#   endif
-
-#   ifdef XMRIG_ALGO_HOOHASHV1
-    static const char *kHOOHASHV1;
-#   endif
-
 #   ifdef XMRIG_ALGO_GHOSTRIDER
     static const char* kGHOSTRIDER;
     static const char* kGHOSTRIDER_RTM;
     static const char* kFLEX;
     static const char* kFLEX_KCN;
+#   endif
+
+#   ifdef XMRIG_ALGO_FISHHASH
+    static const char* kFISHHASH;
+    static const char* kFISHHASH_IRON;
 #   endif
 
     inline Algorithm() = default;
