@@ -1,3 +1,4 @@
+#include "backend/cpu/Cpu.h"
 #include "FishHash.h"
 #include "blake3/keccak.h"
 #include "blake3/blake3.h"
