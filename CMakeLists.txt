@@ -7,8 +7,6 @@ option(WITH_CN_HEAVY        "Enable CryptoNight-Heavy algorithms family" ON)
 option(WITH_CN_PICO         "Enable CryptoNight-Pico algorithm" ON)
 option(WITH_CN_FEMTO        "Enable CryptoNight-UPX2 algorithm" ON)
 option(WITH_CN_GPU          "Enable CryptoNight-GPU algorithm" ON)
-option(WITH_HOOHASH         "Enable Hoohash-GPU algorithm" ON)
-option(WITH_HOOHASHV1       "Enable Hoohashv1-GPU algorithm" ON)
 option(WITH_RANDOMX         "Enable RandomX algorithms family" ON)
 option(WITH_ARGON2          "Enable Argon2 algorithms family" ON)
 option(WITH_KAWPOW          "Enable KawPow algorithms family" ON)
@@ -32,9 +30,10 @@ option(WITH_PROFILING       "Enable profiling for developers" OFF)
 option(WITH_SSE4_1          "Enable SSE 4.1 for Blake2" ON)
 option(WITH_AVX2            "Enable AVX2 for Blake2" ON)
 option(WITH_VAES            "Enable VAES instructions for Cryptonight" ON)
-option(WITH_BENCHMARK       "Enable builtin RandomX benchmark and stress test" ON)
+option(WITH_BENCHMARK       "Enable builtin RandomX benchmark and stress test" OFF)
 option(WITH_SECURE_JIT      "Enable secure access to JIT memory" OFF)
 option(WITH_DMI             "Enable DMI/SMBIOS reader" ON)
+option(WITH_FISHHASH	    "Enable FISHHASH Algorithm" ON)
 
 option(BUILD_STATIC         "Build static binary" OFF)
 option(ARM_V8               "Force ARMv8 (64 bit) architecture, use with caution if automatic detection fails, but you sure it may work" OFF)
@@ -134,10 +133,6 @@ set(SOURCES_CRYPTO
     src/crypto/common/VirtualMemory.cpp
     src/crypto/flex/flex.cpp
     src/crypto/flex/flex_keccak.c
-    src/crypto/hoohash/hoohash.c
-    src/crypto/hoohash/bigint.c
-    src/crypto/hoohashv1/hoohash.c
-    src/crypto/hoohashv1/bigint.c
    )
 
 if (WITH_MO_BENCHMARK)
@@ -221,8 +216,7 @@ include(cmake/kawpow.cmake)
 include(cmake/ghostrider.cmake)
 include(cmake/OpenSSL.cmake)
 include(cmake/asm.cmake)
-include(cmake/hoohash.cmake)
-include(cmake/hoohashv1.cmake)
+include(cmake/fishhash.cmake)
 
 if (WITH_CN_LITE)
     add_definitions(/DXMRIG_ALGO_CN_LITE)
