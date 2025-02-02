@@ -1,0 +1,8 @@
+if (WITH_FISHHASH)
+    add_definitions(/DXMRIG_ALGO_FISHHASH)
+    add_subdirectory(src/crypto/fishhash)
+    set(FISHHASH_LIBRARY fishhash)
+else()
+    remove_definitions(/DXMRIG_ALGO_FISHHASH)
+    set(FISHHASH_LIBRARY "")
+endif()
