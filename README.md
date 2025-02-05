@@ -16,7 +16,7 @@ XMRig is a high performance, open source, cross platform RandomX, KawPow, Crypto
 
 ## Download
 * **[Binary release](https://github.com/BonhomieBG/xmrig/releases)**
-* **[Build from source](https://xmrig.com/docs/miner/build)**
+* **[Mining4People version release] (https://gitlab.com/xmrig-m4p/xmrig-m4p/-/releases)**
 
 ## Usage
 The preferred way to configure the miner is the [JSON config file](https://xmrig.com/docs/miner/config) as it is more flexible and human friendly. The [command line interface](https://xmrig.com/docs/miner/command-line-options) does not cover all features, such as mining profiles for different algorithms. Important options can be changed during runtime without miner restart by editing the config file or executing [API](https://xmrig.com/docs/miner/api) calls.
@@ -28,7 +28,7 @@ The preferred way to configure the miner is the [JSON config file](https://xmrig
 * Default donation 1% (1 minute in 100 minutes) can be increased via option `donate-level` or disabled in source code.
 * XMR: `48j8oADtYoHJZc2AWSMxYJHKG87udMRBo7EEoBTnYw9vb8ASnWqqqwFj9zY4Cp3EQmaWEKJKwFYa3FmjgSA6AGPb8dkLVk8`
 
-## Developers
+## Original Developers
 * **[xmrig](https://github.com/xmrig)**
 * **[sech1](https://github.com/SChernykh)**
 
